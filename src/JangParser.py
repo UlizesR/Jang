@@ -118,21 +118,3 @@ class JangParser:
         self.variables[name] = (self.variables[name][0], value)
         if body != None:
             body.append(f"{name} = {value}")
-
-# test the parser
-if __name__ == '__main__':
-    lexer = JL.JangLexer()
-    parser = JangParser(lexer)
-    text = 'make int x be 10;'
-    tokens = lexer.tokenize(text)
-    parser.parse_tokens(tokens)
-    print(parser.variables)
-    text = 'change x to 20;'
-    tokens = lexer.tokenize(text)
-    parser.parse_tokens(tokens)
-    print(parser.variables)
-
-    text = 'julio wants int add(int x, int y) { make int z be x ; }'
-    tokens = lexer.tokenize(text)
-    parser.parse_tokens(tokens)
-    print(parser.functions)

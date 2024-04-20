@@ -14,6 +14,7 @@ J_TOKENS = {
     'BOOL_LITERAL': r'yuh|nah',
     'VOID_LITERAL': r'void',
     # Keywords
+    'TYPE': r'int|float|bool|char|string|none',
     'ASSIGN': r'be|to',
     'NEW': r'new',
     'PRINT': r'julio says',
@@ -25,11 +26,12 @@ J_TOKENS = {
     'VAR_CHANGE': r'change',
     'CLASS': r'class',
     'CONSTRUCTOR': r'julio makes',
+    'FOR': r'for',
+    'IN': r'in',
     'IF': r'is',
     'ELSE': r'otherwise',
     'WHILE': r'till',
     'FR': r'fr',
-    'TYPE': r'int|float|bool|char|string|none',
     'THIS': r'me.',
     # Symbols
     'LPAREN': r'\(',

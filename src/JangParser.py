@@ -48,46 +48,26 @@ class JangParser:
             else:
                 self.advance()  # Move past unrecognized tokens
 
-    def parse_function_call(self, block = False):
-        # check that the function exists
+    def parse_function_call(self):
+        """Parse a function call."""
         name = self.tokens[self.current_token_index].value
-        # check if the the next token is a LPAREN
         if self.tokens[self.current_token_index + 1].type != 'LPAREN':
             raise RuntimeError('Expected LPAREN after function name')
-        # check that the last token is a RPAREN
         if self.tokens[-1].type != 'RPAREN':
             raise RuntimeError('Expected RPAREN at the end of the function call')
         if name not in self.functions:
             raise RuntimeError(f'Function {name} does not exist')
-        if block == False:
-            # add the function call to the AST
-            self.ast.append(JangFunctionCall(name))
-        else:
-            # add the function call to the body
-            self.parse_function_call_body(name)
+        self.ast.append(JangFunctionCall(name))
         
-    def parse_conditional(self, block = False):
-        # check that either the last token is { or is fr
-        self.advance() # Consume ( token
+    def parse_conditional(self):
+        """Parse a conditional statement."""
+        self.advance()  # Consume ( token
         condition = self.parse_expression(tok_type_check='RPAREN', tok_to_check=')')
-        print(condition)
         if self.advance().type != 'FR':
             raise RuntimeError('Expected FR after conditional')
         body = self.parse_body()
-        # if self.tokens[self.current_token_index].type == 'ELSE':
-        #     self.advance()
-        #     else_body = self.parse_body()
-        # else:
-        #     else_body = None
-        if block == False:
-            # add the conditional to the AST
-            self.ast.append(JangConditional(condition, body))
-        # else:
-        #     # add the conditional to the body
-        #     self.parse_conditional_body(condition, body, None)
-
-
-
+        else_body = self.parse_body() if self.tokens[self.current_token_index].type == 'ELSE' else None
+        self.ast.append(JangConditional(condition, body, else_body, 4))
 
     def parse_function_declaration(self, c_body = None, method = False):
         # print(self.advance().value)  # Assume FUNC_DCL token is consumed before calling
@@ -248,8 +228,11 @@ if __name__ == '__main__':
     lexer = JL.JangLexer()
     parser = JangParser(lexer)
 
-    text = """is (yuh) fr {
+    text = """is (True == yuh) fr {
             julio says "Hello World";
+            julio says "Goodbye World";
+        } otherwise {
+            julio says "Goodbye World";
         }
 
     """

@@ -1,15 +1,126 @@
+// Perception has its own weights, gets fed an input value and each gets multiplied and summed by each weight
+
+// Hidden layers only hold the perceptrons and feed the input array into each perceptron, and hold the array to feed forward to the next layer
+
 class perceptron {
-    init() {
-        pass;
+    init(int[] weights, int bias, int size) {
+        make me.bias be bias;
+        make me.weights[] be weights;
+        make me.size be size;
     }
 
-    julio wants float relu(float input) {
+    julio wants int ReLU(int inputSum) {
+        is inputSum < 0 fr {
+            julio gets 0;
+        }
+        julio gets inputSum;
+    }
+
+    julio wants int SumInputs(int[] inputArr) {
+        make int sum be me.bias;
+        for index in range(me.size) {
+            change sum to sum + (inputArr[index] * me.weights[index]);
+        }
+        julio gets sum;
+    }
+
+    julio wants int feedThrough(int[] inputArr) {
+        make int out be me.SumInputs(inputArr);
+        change out to me.ReLU(out);
+        julio gets out;
+    }
+}
+
+class HiddenLayer {
+    init(int size, int[] weights, int[] biases) {
+        make me.perceptrons be perceptron[];
+        make me.size be size;
+        for i in range(size) {
+            change me.perceptrons[i] to new perceptron(weights[i], bias[index], size);
+        }
+    }
+
+    julio wants int[] feedThrough(int[] inputArr) {
+        make int[] out; 
+        make int temp;
+        make int count be 0;
+        for pt in me.perceptrons {
+            change temp to pt.feedThrough(inputArr);
+            change out[count] to temp;
+            change count to count + 1;
+        }
+        julio gets out;
+    }
+}
+
+make perceptron output be new perceptron([2,2], -1, 2);
+make hiddenLayer hl be new HiddenLayer(2, [[2,2],[2,2]], [[-3, -1]]);
+
+
+
+
+
+
+input   hidden 1                    hidden 2
+
+ i1  --- p1(b=-3, weights = [2,2]) \   
+     \/                               o1(b=-1, weights = [-2,2])
+ i2  --- p2(b=-1, weights = [2,2]) /
+
+
+ class Perceptron {
+    init(int[] weights, int bias, int size) {
+        make int me.bias be bias;
+        make int[] me.weights be weights;
+        make int me.size be size;
+    }
+
+    julio wants int stepf(int input) {
         is input < 0 fr {
             julio gets 0;
         }
-        julio gets input;
+        julio gets 1;
     }
 
-    
+    julio wants int sumInputs(int[] inpArr) {
+        make int sum be me.bias;
+        for index in range(me.size) {
+            change sum to sum + (me.weights[index] * inpArr[index]);
+        }
+        julio gets sum;
+    }
+
+    julio wants int feedThrough(int[] inpArr) {
+        make int out be me.sumInputs(inpArr);
+        change out to me.stepf(out);
+        julio gets out;
+    }
 }
 
+class HiddenLayer {
+    init(int size, int[] weights, int[] biases) {
+        make perceptron[] me.perceptrons;
+        make me.size be size;
+        for index in range(size) {
+            change me.perceptrons[index] to new perceptron(weights[index], biases[index. size]);
+        }
+    }
+
+    julio wants int[] feedThrough(inpArr) {
+        make int[] out;
+        make int temp be 0;
+        make int count be 0;
+        for pt in me.perceptrons {
+            change temp to pt.feedThrough(inpArr);
+            chnage out[count] to temp;
+            change count to count + 1;
+        }
+        julio gets out;
+    }
+}
+
+make perceptron output be new perceptron([-1,1], -.5, 2);
+make HiddenLayer hl be new HiddenLayer(2, [[1,1],[1,1]], [-1.5, -.5]);
+make int hlOut be hl.feedThrough([0,0]);
+change hlOut to output.feedThrough(hlOut);
+julio says hlOut;

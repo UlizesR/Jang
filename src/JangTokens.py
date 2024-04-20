@@ -28,6 +28,7 @@ J_TOKENS = {
     'IF': r'is',
     'ELSE': r'otherwise',
     'WHILE': r'till',
+    'FOR': r'for',
     'FR': r'fr',
     'TYPE': r'int|float|bool|char|string|none',
     'THIS': r'me.',

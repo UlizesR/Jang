@@ -30,6 +30,10 @@ class JangParser:
                 self.parse_variable_declaration()
             elif token.type == 'VAR_CHANGE':
                 self.parse_variable_change()
+            elif token.type == "WHILE":
+                self.parse_while_loop()
+            elif token.type == "FOR":
+                self.parse_for_loop()
             else:
                 self.advance()  # Move past unrecognized tokens
 
@@ -96,13 +100,25 @@ class JangParser:
 
     def parse_variable_declaration(self, body = None):
         type_ = self.advance().value
-        name = self.advance().value
-        if self.advance().value != 'be':
+        arrCheck = self.advance()
+        if arrCheck.type == "LBRACKET":
+            type_ += "Array"
+            if self.advance().type != "RBRACKET":
+                raise RuntimeError('Missing close bracket')
+            name = self.advance().value
+            nt = self.advance()
+            if nt.type != "RBRACKET":
+                if nt.type != "SEMICOLON":
+                    raise RuntimeError("Either create an empty array or assign to a hardcoded array!")
+        else:
+            name = arrCheck.value
+        beCheck = self.advance()
+        if beCheck.value != 'be':
             raise RuntimeError('Expected "be" in variable declaration')
         value = self.advance().value
         if self.advance().type != 'SEMICOLON':
             raise RuntimeError('Expected SEMICOLON at the end of the variable declaration')
-        self.variables[name] = (type_, value)
+        self.variables[name] = (type_, value) 
         if body != None:
             body.append(f"{type_} {name} = {value}")
 
@@ -119,16 +135,32 @@ class JangParser:
         if body != None:
             body.append(f"{name} = {value}")
 
+    def parse_while_loop(self, body = None):
+        pass
+    
+    def parse_for_loop(self, body = None):
+        forVar = self.advance().value
+        if self.advance().value != 'in':
+            raise RuntimeError('Expected "in" following temp variable declaration')
+        # check for iterable value
+            # Valid options: array, variable holding array
+        iterator = self.advance()
+        itVal = iterator.value
+        itType = iterator.type
+        pass
+        
+
 # test the parser
 if __name__ == '__main__':
     lexer = JL.JangLexer()
     parser = JangParser(lexer)
-    text = 'make int x be 10;'
+    text = 'make int[] x;'
     tokens = lexer.tokenize(text)
     parser.parse_tokens(tokens)
     print(parser.variables)
-    text = 'change x to 20;'
+    text = 'change x[4] to 20;'
     tokens = lexer.tokenize(text)
+    print(tokens)
     parser.parse_tokens(tokens)
     print(parser.variables)
 

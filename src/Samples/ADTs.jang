@@ -1,0 +1,128 @@
+class OneWayNode {
+    Julio makes OneWayNode(int value, nextNode) {
+        make OneWayNode me.next be nextNode;
+        make decimal me.value be value;
+    }
+
+    Julio wants OneWayNode getNext() {
+        julio gets me.next;
+    }
+
+    Julio wants bool checkLinked() {
+        is (me.next bebe none) fr {
+            julio gets nah;
+        }
+        julio gets yuh;
+    }
+
+    Julio wants None setNext(OneWayNode nextNode) {
+        change me.next to nextNode;
+    }
+
+    Julio wants int getValue() {
+        julio gets me.value;
+    }
+}
+
+class Queue {
+    init() {
+        make None me.head be None;
+        make me.last be None;
+        make int me.size be 0;
+    }
+
+    julio wants None enqueue(int value) {
+        make OneWayNode node be new OneWayNode(value);
+        is (me.head) not fr {
+            change me.head to node;
+            change me.last to node;
+            change me.size to me.size + 1;
+        }
+        otherwise {
+            me.last.setNextNode(node);
+            change me.last to node;
+            change me.size to me.size + 1
+        }
+    }
+
+    julio wants int dequeue() {
+        is (me.size == 0) fr {
+            julio gets None
+        }
+        make OneWayNode toDequeue be me.head;
+        make OneWayNode newHead be toDequeue.getNextNode();
+        change me.head to newHead;
+        make int dequeuedValue be toDequeue.getValue();
+        change me.size to me.size - 1;
+        julio gets dequeuedValue;
+    }
+
+    julio wants int peek() {
+        make OneWayNode head be me.head;
+        is (head == none) fr {
+            julio gets -.1;
+        }
+        julio gets head.getValue();
+    }
+
+    julio wants int getSize() {
+        julio gets me.size;
+    }
+
+    julio wants bool isEmpty() {
+        is (me.size == 0 )fr {
+            julio gets yuh;
+        }
+        julio gets nah;
+    }
+}
+
+class Stack {
+    init() {
+        make me.primary be new Queue();
+        make me.secondary be new Queue();
+        make me.size be 0;
+    }
+
+    julio wants none push(int value) {
+        is me.primary.isEmpty() fr {
+            me.primary.enqueue(value);
+        }
+        otherwise {
+            me.primary.enqueue(value);
+            make int primaryHead be me.primary.dequeue();
+            me.primary.enqueue(primaryHead);
+        }
+        make me.size be me.size + 1;
+    }
+
+    julio wants int pop() {
+        make int toReturn be me.primary.dequeue();
+        is (me.secondary.isEmpty()) not fr {
+            for _ in range(me.secondary.getSize()) {
+                make int value be me.secondary.dequeue();
+                me.push(value);
+            }
+        }
+        change me.size to me.size - 1;
+        julio gets toReturn;
+    }
+
+    julio wants int peek() {
+        make int value be me.primary.dequeue();
+        me.primary.enqueue(value);
+        julio gets value;
+    }
+
+    julio wants int getSize() {
+        julio gets me.size;
+    }
+
+    julio wants bool isEmpty() {
+        is (me.size == 0) fr {
+            julio gets yuh;
+        }
+        julio gets nah;
+    }
+}
+

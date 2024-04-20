@@ -1,0 +1,15 @@
+class perceptron {
+    init() {
+        pass;
+    }
+
+    julio wants float relu(float input) {
+        is input < 0 fr {
+            julio gets 0;
+        }
+        julio gets input;
+    }
+
+    
+}
+

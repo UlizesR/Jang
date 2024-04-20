@@ -1,0 +1,16 @@
+KEYWORD             |        Code
+================================================
+Return              |       julio gets
+Input               |       julio asks
+Var Declaration     |       make type 
+Func Declaration    |       julio wants type
+Print               |       julio says 
+Conditional         |       is (condition) fr?
+Array               |       make type var[]
+While loop          |       till (condition) is fr?
+For loop            |       
+File Read           |       can julio read
+File Write          |       can julio write
+Bools               |       Yuh / Nah 
+macros              |       julio defines
+import              |       julio grabs

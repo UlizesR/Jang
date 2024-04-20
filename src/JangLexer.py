@@ -64,19 +64,3 @@ class JangLexer:
     
     def __repr__(self):
         return f'{self.tokens}'
-    
-# test the lexer
-if __name__ == '__main__':
-    lexer = JangLexer()
-    # text = 'make int x be 10;'
-    # tokens = lexer.tokenize(text)
-    # print(tokens)
-    # text = 'is (x < 10) fr { julio says yuh; }'
-    # tokens = lexer.tokenize(text)
-    # print(tokens[0].type, tokens[0].value, tokens[0].pos)
-
-    text = "julio says \"Hello, World!\";"
-    tokens = lexer.tokenize(text)
-    if tokens[0].type == 'PRINT':
-        # remove the "" from the string value and print it
-        print(tokens[1].value[1:-1])

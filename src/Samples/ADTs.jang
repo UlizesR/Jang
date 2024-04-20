@@ -59,7 +59,7 @@ class Queue {
 
     julio wants int peek() {
         make OneWayNode head be me.head;
-        is head == none fr {
+        is (head == none) fr {
             julio gets -.1;
         }
         julio gets head.getValue();
@@ -70,7 +70,7 @@ class Queue {
     }
 
     julio wants bool isEmpty() {
-        is me.size == 0 fr {
+        is (me.size == 0 )fr {
             julio gets yuh;
         }
         julio gets nah;
@@ -98,7 +98,7 @@ class Stack {
 
     julio wants int pop() {
         make int toReturn be me.primary.dequeue();
-        is me.secondary.isEmpty() not fr {
+        is (me.secondary.isEmpty()) not fr {
             for _ in range(me.secondary.getSize()) {
                 make int value be me.secondary.dequeue();
                 me.push(value);
@@ -119,7 +119,7 @@ class Stack {
     }
 
     julio wants bool isEmpty() {
-        is me.size == 0 fr {
+        is (me.size == 0) fr {
             julio gets yuh;
         }
         julio gets nah;

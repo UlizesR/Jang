@@ -26,6 +26,8 @@ class JangParser:
         self.lexer = lexer
         self.cursor = Cursor
 
+        self.variables = {}
+
     def Parse(self, tokens):
         self.cursor = Cursor(tokens)
         while self.cursor.isTokensLeft():
@@ -39,8 +41,7 @@ class JangParser:
                 # self.parse_import_statement()
                 pass
             elif token.type == 'VAR_DCL':
-                # self.parse_variable_declaration()
-                pass
+                self.parseVariableDeclaration()
             elif token.type == 'VAR_CHANGE':
                 # self.parse_variable_change()
                 pass
@@ -62,3 +63,17 @@ class JangParser:
                 pass
             else:
                 self.cursor.advanceToken()  # Move past unrecognized tokens
+
+    def parseVaribleDeclaration(self, body):
+        type_ = self.cursor.advanceToken().value
+        nextToken = self.cursor.advanceToken()
+        if nextToken.type == 'THIS':
+            name = self.cursor.advanceToken().value
+        else:
+            name = nextToken.value
+
+        if self.cursor.advanceToken().value != 'be':
+            raise RuntimeError('Expected "be" in variable declaration')
+        
+        value = self.cursor.advanceToken().value
+        self.variables[name] = (type_, value)

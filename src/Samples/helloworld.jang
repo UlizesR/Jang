@@ -1,4 +1,5 @@
 julio wants none helloWorld() {
-    julio says "Hello World";
+    make string myString be "Hello, world!";
+    julio says myString;
     julio gets none;
 }

@@ -78,7 +78,7 @@ class JangParser:
             else:
                 self.cursor.advanceToken()  # Move past unrecognized tokens
 
-    def parseVaribleDeclaration(self, body):
+    def parseVaribleDeclaration(self, body = None):
         type_ = self.cursor.advanceToken().value
         nextToken = self.cursor.advanceToken()
         if nextToken.type == 'THIS':
@@ -91,6 +91,10 @@ class JangParser:
         
         value = self.cursor.advanceToken().value
         self.variables[name] = (type_, value)
+
+        if body != None:
+            body.append(f"{type_} {name} = {value}")
+            return body
 
     def parseFunctionDeclaration(self):
         returnType = self.cursor.advanceToken().value
@@ -126,7 +130,24 @@ class JangParser:
                 self.advance()  # Consume COMMA
         self.advance()  # Consume RPAREN
         return args
+        
 
     def parseBody(self):
-        pass
+        body = []
+        while self.cursor.isTokensLeft() and self.cursor.getToken().type != 'RBRACE':
+            token = self.cursor.getToken()
+            if token.type == 'VAR_DCL':
+                body.append(self.parseVaribleDeclaration(body))
+            elif token.type == 'VAR_CHANGE':
+                pass
+            elif token.type == 'PRINT':
+                pass
+            elif token.type == 'RETURN':
+                pass
+            elif token.type == 'IF':
+                pass
+            else:
+                self.cursor.advanceToken()  # Move past unrecognized tokens
+        self.cursor.advanceToken()  # Consume RBRACE
+        return body
         

@@ -1,4 +1,4 @@
-import JangParser as JP
+import JangParser2 as JP
 import JangLexer as JL
 import sys
 import os

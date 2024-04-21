@@ -1,5 +1,5 @@
 import JangLexer as JL
-import JangParser as JP
+import JangParser2 as JP
 from JangStructs import *
 
 class CodeGenerator:

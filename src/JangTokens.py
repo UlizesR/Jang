@@ -14,6 +14,7 @@ J_TOKENS = {
     'BOOL_LITERAL': r'yuh|nah',
     'VOID_LITERAL': r'void',
     # Keywords
+    'ARRAY': r'int\[\]|float\[\]|bool\[\]|char\[\]|string\[\]',
     'TYPE': r'int|float|bool|char|string|none',
     'ASSIGN': r'be|to',
     'NEW': r'new',

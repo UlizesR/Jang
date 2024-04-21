@@ -3,7 +3,7 @@ import unittest
 
 sys.path.append('../src')
 from JangLexer import JangLexer as JL
-from JangParser import JangParser as JP
+from JangParser2 import JangParser as JP
 
 """
 Done:

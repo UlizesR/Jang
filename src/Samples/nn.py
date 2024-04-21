@@ -40,6 +40,13 @@ class HiddenLayer:
 output = perceptron([-1,1], -.5, 2)
 hl = HiddenLayer(2, [[1,1],[1,1]], [-1.5, -.5])
 
-hlOut = hl.feedThrough([0,0])
-print(hlOut)
+
+Input = []
+for i in range(1,3):
+    Input.append(int(input(f"Please input wire {i}  ")))
+
+print("Input: " + str(Input))
+
+hlOut = hl.feedThrough(Input)
+print("XOR Output: ", end="")
 print(output.feedThrough(hlOut))

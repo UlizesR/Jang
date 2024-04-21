@@ -56,11 +56,10 @@ class JangParser:
                 pass
 
             elif token.type == 'RETURN':
-                pass
+                self.parseReturn()
 
             elif token.type == 'PRINT':
-                # self.parse_print_statement()
-                pass
+                self.parsePrint()
 
             elif token.type == 'CLASS':
                 # self.parse_class_declaration()
@@ -141,7 +140,7 @@ class JangParser:
             elif token.type == 'VAR_CHANGE':
                 pass
             elif token.type == 'PRINT':
-                pass
+                body.append(self.parsePrint(body))
             elif token.type == 'RETURN':
                 pass
             elif token.type == 'IF':
@@ -150,4 +149,16 @@ class JangParser:
                 self.cursor.advanceToken()  # Move past unrecognized tokens
         self.cursor.advanceToken()  # Consume RBRACE
         return body
-        
+    
+    def parseReturn(self, body = None):
+        returnValue = self.cursor.advanceToken().value
+        if body != None:
+            body.append(f"return {returnValue}")
+            return body
+    
+    def parsePrint(self, body = None):
+        printString = self.cursor.advanceToken().value
+
+        if body != None:
+            body.append(f"print({printString})")
+            return body

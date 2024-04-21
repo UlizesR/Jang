@@ -111,7 +111,21 @@ class JangParser:
         }
 
     def parseArguments(self):
-        pass
+        args = []
+        while self.cursor.getToken().type != 'RPAREN':
+            argType = self.cursor.getToken()
+            if argType is None or argType.type != 'TYPE':
+                raise RuntimeError(f'Expected type, got {argType.type if argType else "None"}')
+            
+            argName = self.cursor.advanceToken()
+            if argName is None or argName.type != 'IDENTIFIER':
+                raise RuntimeError(f'Expected variable name, got {argName.type if argName else "None"}')
+            
+            args = JangArgs(argType.value, argName.value)
+            if self.cursor.getToken().type == 'COMMA':
+                self.advance()  # Consume COMMA
+        self.advance()  # Consume RPAREN
+        return args
 
     def parseBody(self):
         pass

@@ -1,16 +1,28 @@
-KEYWORD             |        Code
+TOKENS              |        Code
 ================================================
-Return              |       julio gets
-Input               |       julio asks
-Var Declaration     |       make type 
-Func Declaration    |       julio wants type
-Print               |       julio says 
-Conditional         |       is (condition) fr?
-Array               |       make type var[]
-While loop          |       till (condition) is fr?
-For loop            |       
-File Read           |       can julio read
-File Write          |       can julio write
-Bools               |       Yuh / Nah 
-macros              |       julio defines
-import              |       julio grabs
+RETURN              |       julio gets
+INPUT               |       julio asks
+VAR_DECL            |       make 
+VAR_CHNG            |       change 
+FUNC_DECL           |       julio wants
+PRINT               |       julio says 
+CONDITIONAL         |       is (condition) fr
+ARRAY               |       identifier[]
+WHILE_LOOP          |       till (condition) is fr
+FOR_LOOP            |       julio counts (thing to count)
+FILE_READ           |       can julio read
+FILE_WRITE          |       can julio write
+BOOL                |       Yuh / Nah 
+IMPORT              |       julio grabs
+ASSIGN              |       be / to 
+OPERATOR            |       + / *
+RELATIONAL          |       == / > / < / <= / >= / !=
+NOT                 |       not
+L_CBRAKET           |       {
+R_CBRAKET           |       }
+LPAREN              |       (
+RPAREN              |       )
+L_BRAKET            |       [
+R_BRAKET            |       ]
+TYPE                |       int / str / dec / char 
+CLASS               |       class 

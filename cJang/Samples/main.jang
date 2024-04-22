@@ -1,0 +1,15 @@
+julio wants int main()
+{
+    julio says "Hello, World!";
+
+    make int x be 2;
+    make int y be 4;
+
+    change x to y;
+
+    make int arr[];
+
+    change arr[4] to 42;
+
+    julio gets 0;
+}

@@ -3,17 +3,15 @@
 #include <vector>
 
 #include "jangLexer.hpp"
+#include "jangParser.hpp"
 
 int main() {
     // Test the lexer
     JangLexer lexer;
+    JangParser parser;
     std::vector<Token> tokens = lexer.tokenizeFile("../Samples/main.jang");
 
-    // Print tokens
-    for (const auto& token : tokens) 
-    {
-        std::cout << "Token: " << token.lexeme << "\t Type: " << lexer.tokenTypeMap[token.type] << "\t Line: " << token.line << std::endl;
-    }
+    parser.parse(tokens, lexer);
 
     return 0;
 }

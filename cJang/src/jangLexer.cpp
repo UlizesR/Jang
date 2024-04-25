@@ -8,9 +8,9 @@ TokenType JangLexer::getTokenType(const std::string& word)
     // Identifier
     std::regex identifierPattern("[a-zA-Z_][a-zA-Z0-9_]*");
     // array declaration
-    std::regex arrayDeclarationPattern("[a-zA-Z_][a-zA-Z0-9_]*\\[\\]");
+    std::regex arrayDeclarationPattern("[a-zA-Z_][a-zA-Z0-9_]*\\[[0-9]+\\]");
     // string, char, int, decimal
-    std::regex literalPattern("\".*\"|'.*'|[0-9]+|([0-9]+\\.[0-9]+)");
+    std::regex literalPattern("\".*\"|'.*'|[0-9]+|([0-9]+\\.[0-9]*)");
     // relational operators
     std::regex relationalPattern("<|>|<=|>=|==|!=");
     // operators
@@ -83,8 +83,9 @@ JangLexer::JangLexer()
         {"change", VAR_CHNG},
         {"wants", FUNC_DECL},
         {"says", PRINT},
-        {"is", CONDITIONAL},
-        {"fr", L_CBRAKET},
+        {"is", IF_START},
+        {"fr", IF_END},
+        {"else", ELSE},
         {"till", WHILE_LOOP},
         {"counts", FOR_LOOP},
         {"can", FILE_READ},
@@ -109,7 +110,9 @@ JangLexer::JangLexer()
         {VAR_CHNG, "VAR_CHNG"},
         {FUNC_DECL, "FUNC_DECL"},
         {PRINT, "PRINT"},
-        {CONDITIONAL, "CONDITIONAL"},
+        {IF_START, "IF_START"},
+        {IF_END, "IF_END"},
+        {ELSE, "ELSE"},
         {ARRAY, "ARRAY"},
         {WHILE_LOOP, "WHILE_LOOP"},
         {FOR_LOOP, "FOR_LOOP"},

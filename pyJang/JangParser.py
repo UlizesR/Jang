@@ -1,244 +1,243 @@
-import JangLexer as JL
-from JangStructs import *
-from JangTokens import J_TOKENS 
+import JangNodes as jn
+import JangLexer as jl
+from JangTokens import J_TOKENS
 
 class JangParser:
     def __init__(self, lexer):
-        self.lexer = lexer
+        self.lexer = lexer  
         self.tokens = []
-        self.current_token_index = 0
-
-        self.variables = {}
-        self.functions = {}
-        self.classes = {}
         self.ast = []
+
+        self.functions = {}
+        self.variables = {}
+        self.classes = {}
+
 
     def advance(self):
         self.current_token_index += 1
-        if self.current_token_index < len(self.tokens):
-            return self.tokens[self.current_token_index]
-        return None
+        if self.current_token_index >= len(self.tokens):
+            raise RuntimeError(f'Unexpected end of file at line {self.line_number}. Closing bracket or parenthesis may be missing.')
+        return self.tokens[self.current_token_index]
 
-    def parse_tokens(self, tokens):
+    def parse_func(self):
+        func_node = jn.JangFuncNode(self.tokens[self.current_token_index])
+        self.expect_token_type('TYPE', func_node)
+        self.expect_token_type('IDENTIFIER', 'function name', func_node)
+        self.expect_token_type(expected_type='LPAREN', expected_tk='(')
+        if self.current_token_index < len(self.tokens) and self.tokens[self.current_token_index].type != 'RPAREN':
+            func_node.add_child(self.parse_param())
+        # check that the current token is a RPAREN
+        if self.current_token_index >= len(self.tokens) or self.tokens[self.current_token_index].type != 'RPAREN':
+            raise RuntimeError(f'Expected a RPAREN at line {self.line_number} but None was found')
+        if self.advance().type == 'NEWLINE':
+            self.line_number += 1
+        self.expect_token_type('LBRACE', '{')
+        func_node.add_child(self.parse_body())
+        # check that the current token is a RBRACE
+        if self.current_token_index >= len(self.tokens) or self.tokens[self.current_token_index].type != 'RBRACE':
+            raise RuntimeError("Expected a '}' at line {} but None was found".format(self.line_number))
+
+        return func_node
+
+    def parse(self, tokens):
         self.tokens = tokens
+        self.line_number = 1
         self.current_token_index = 0
+
         while self.current_token_index < len(self.tokens):
             token = self.tokens[self.current_token_index]
-            if token.type == 'NEWLINE' or token.type == 'EOF':
+            if token.type == 'FUNC':
+                func_node = self.parse_func()
+                self.ast.append(func_node)
+            if token.type == 'NEWLINE':
+                self.line_number += 1
                 self.advance()
-            if token.type == 'FUNC_DCL':
-                self.parse_function_declaration()
-            elif token.type == 'IMPORT':
-                self.parse_import_statement()
-            elif token.type == 'VAR_DCL':
-                self.parse_variable_declaration()
-            elif token.type == 'VAR_CHANGE':
-                self.parse_variable_change()
-            elif token.type == 'RETURN':
-                self.parse_return_statement()
-            elif token.type == 'PRINT':
-                self.parse_print_statement()
-            elif token.type == 'CLASS':
-                self.parse_class_declaration()
-            elif token.type == 'IDENTIFIER':
-                # if the first token is an identifier, its most likely a function call
-                self.parse_function_call()
-            elif token.type == 'IF':
-                self.parse_conditional()
-            else:
-                self.advance()  # Move past unrecognized tokens
+            self.current_token_index += 1
+        # print(self.ast)
 
-    def parse_function_call(self):
-        """Parse a function call."""
-        name = self.tokens[self.current_token_index].value
-        if self.tokens[self.current_token_index + 1].type != 'LPAREN':
-            raise RuntimeError('Expected LPAREN after function name')
-        if self.tokens[-1].type != 'RPAREN':
-            raise RuntimeError('Expected RPAREN at the end of the function call')
-        if name not in self.functions:
-            raise RuntimeError(f'Function {name} does not exist')
-        self.ast.append(JangFunctionCall(name))
+    def parse_func(self):
+        func_node = jn.JangFuncNode(self.tokens[self.current_token_index])
+        self.expect_token_type('TYPE', func_node)
+        self.expect_token_type('IDENTIFIER', 'function name', func_node)
+        self.expect_token_type(expected_type='LPAREN', expected_tk='(')
+        if self.tokens[self.current_token_index].type != 'RPAREN':
+            func_node.add_child(self.parse_param())
+        # check that the current token is a RPAREN
+        if self.tokens[self.current_token_index].type != 'RPAREN':
+            raise RuntimeError(f'Expected a RPAREN at line {self.line_number} but None was found')
+        if self.advance().type == 'NEWLINE':
+            self.line_number += 1
+        self.expect_token_type('LBRACE', '{')
+        func_node.add_child(self.parse_body())
+        # check that the current token is a RBRACE
+        if self.tokens[self.current_token_index].type != 'RBRACE':
+            raise RuntimeError("Expected a '}' at line {} but None was found".format(self.line_number))
+
         
-    def parse_conditional(self):
-        """Parse a conditional statement."""
-        self.advance()  # Consume ( token
-        condition = self.parse_expression(tok_type_check='RPAREN', tok_to_check=')')
-        if self.advance().type != 'FR':
-            raise RuntimeError('Expected FR after conditional')
-        body = self.parse_body()
-        else_body = self.parse_body() if self.tokens[self.current_token_index].type == 'ELSE' else None
-        self.ast.append(JangConditional(condition, body, else_body, 4))
+        return func_node
 
-    def parse_function_declaration(self, c_body = None, method = False):
-        # print(self.advance().value)  # Assume FUNC_DCL token is consumed before calling
-        return_type = self.advance().value
-        name = self.advance().value
-        if self.advance().type != 'LPAREN':
-            raise RuntimeError('Expected LPAREN after function name')
-        next_token = self.advance()
-        if next_token.type == 'RPAREN':
-            args = []
-        else:
-            args = self.parse_arguments()
-        f_body = self.parse_body()
-        self.functions[name] = {
-            'return_type': return_type,
-            'args': args,
-            'body': f_body 
-        }
-        # add function to the AST
-        if method and c_body != None:
-            c_body.append(JangFunction(name, return_type, args, f_body, 4))
-        else:
-            self.ast.append(JangFunction(name, return_type, args, f_body, 2))
-
-    def parse_class_declaration(self):
-
-        # Actual class parsing logic
-        name = self.advance().value
-        self.advance()  # Consume LBRACE
-
-        c_body = []
-
-        while self.current_token_index < len(self.tokens) and self.tokens[self.current_token_index].type != 'RBRACE':
-            next_tok = self.advance()
-            if next_tok is None:
-                raise RuntimeError(f'next_tok is None, prev token: {self.tokens[self.current_token_index - 1].type}')
-            if next_tok.type == 'FUNC_DCL':
-                self.parse_function_declaration(c_body, True)
-            # else:
-                # self.advance()
-        self.advance()  # Consume RBRACE
-
-        # add class to the classes dictionary
-        self.classes[name] = c_body
-        # add class to the AST
-        self.ast.append(JangClass(name, c_body))
-
-    def parse_arguments(self):
-        args = []
+    def parse_param(self):
+        param_node = jn.JangParamNode(self.tokens[self.current_token_index])
+        i = 1
         while self.tokens[self.current_token_index].type != 'RPAREN':
-            type_token = self.tokens[self.current_token_index]
-            if type_token is None or type_token.type != 'TYPE':
-                raise RuntimeError(f'Expected type, got {type_token.type if type_token else "None"}')
-            name_token = self.advance()
-            if name_token is None or name_token.type != 'IDENTIFIER':
-                raise RuntimeError(f'Expected variable name, got {name_token.type if name_token else "None"}')
-            args.append(JangArgs(type_token.value, name_token.value))
-            self.advance()  # Consume COMMA or RPAREN
-            if self.tokens[self.current_token_index].type == 'COMMA':
-                self.advance()  # Consume COMMA
-        self.advance()  # Consume RPAREN
-        return args
+            if i % 3 == 0 and self.tokens[self.current_token_index].type == 'COMMA':
+                self.expect_token_type('COMMA', ',')
+            if self.tokens[self.current_token_index].type != 'LPAREN':
+                param_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.advance()
+            i += 1
+        return param_node
     
     def parse_body(self):
-        body = []
-        while self.current_token_index < len(self.tokens) and self.tokens[self.current_token_index].type != 'RBRACE':
-            token = self.tokens[self.current_token_index]
-            if token.type == 'VAR_DCL':
-                self.parse_variable_declaration(body)
-            elif token.type == 'VAR_CHANGE':
-                self.parse_variable_change(body)
-            elif token.type == 'PRINT':
-                self.parse_print_statement(body, True)
-            elif token.type == 'RETURN':
-                self.parse_return_statement(body)
-            elif token.type == 'IF':
-                self.parse_conditional(True)
-
-            else:
-                self.advance()  # Move past unrecognized tokens
-            #     print(self.tokens[self.current_token_index].type)
-            # print(self.tokens[self.current_token_index].value)
-        self.advance()  # Consume RBRACE
-        return body
-
-    def parse_import_statement(self):
-        self.advance()  # Consume IMPORT token
-        # Actual import parsing logic
-
-    def parse_return_statement(self, body = None):
-        # Actual return parsing logic
-        expr = self.parse_expression(tok_type_check='SEMICOLON', tok_to_check=';')
-        value = expr
-        if body != None:
-            body.append(f"return {value}")
-
-    def parse_print_statement(self, body = None, block = False):
-        # Actual print parsing logic
-        expr = self.parse_expression(block, 'SEMICOLON', ';')
-        value = expr
-        if body != None:
-            body.append(f"print({value})")
-        if not block:
-            # add the body to the AST
-            self.ast.append(JangPrint(value))
-
-    def parse_expression(self, block = None, tok_type_check = None, tok_to_check = None):
-        # Actual expression parsing logic
-        expr = []
-        expr_s = ''
-        while self.current_token_index < len(self.tokens) and self.tokens[self.current_token_index].type != tok_type_check:
-            tok = self.advance()
-            if tok.value == tok_to_check:
-                continue
-            expr_s += tok.value
-        expr.append(expr_s)
-        return expr
+        body_node = jn.JangBodyNode(self.tokens[self.current_token_index])
+        while self.tokens[self.current_token_index].type != 'RBRACE':
+            if self.tokens[self.current_token_index].type == 'PRINT':
+                body_node.add_child(self.parse_print())
+            elif self.tokens[self.current_token_index].type == 'VAR':
+                body_node.add_child(self.parse_var_dcl())
+            elif self.tokens[self.current_token_index].type == 'VAR_CHANGE':
+                body_node.add_child(self.parse_var_change())
+            elif self.tokens[self.current_token_index].type == 'RETURN':
+                body_node.add_child(self.parse_ret())
+            elif self.tokens[self.current_token_index].type == 'WHILE':
+                body_node.add_child(self.parse_while())
+            elif self.tokens[self.current_token_index].type == 'NEWLINE':
+                self.line_number += 1
+            self.advance()
+        return body_node
     
-    def parse_variable_declaration(self, body = None):
-        type_ = self.advance().value
-        next_tok = self.advance()
-        if next_tok.type == 'THIS':
-            name = self.advance().value
+    
+    def parse_print(self):
+        print_node = jn.JangPrintNode(self.tokens[self.current_token_index])
+        self.advance()
+        # advance to the next token until a ; is found
+        while self.tokens[self.current_token_index].type != 'SEMICOLON':
+            if self.tokens[self.current_token_index].type == 'NEWLINE':
+                self.line_number += 1
+                raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
+            # if self.tokens[self.current_token_index].type == 'IDENTIFIER':
+            print_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.advance()
+
+        return print_node
+    
+    def parse_var_dcl(self):
+        var_node = jn.JangVarNode(self.tokens[self.current_token_index])
+        self.expect_token_type('TYPE', 'variable type', var_node)
+        # check if the next token is an identifier or an array
+        if self.advance().type != 'ARRAY':
+            var_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.expect_token_type('ASSIGN', 'be')
         else:
-            name = next_tok.value
-        if self.advance().value != 'be':
-            raise RuntimeError('Expected "be" in variable declaration')
-        expr = self.parse_expression()
-        value = expr 
-        # if self.advance().type != 'SEMICOLON':
-        #     raise RuntimeError('Expected SEMICOLON at the end of the variable declaration')
-        self.variables[name] = (type_, value)
-        if body != None:
-            body.append(f"{type_} {name} = {value}")
+            var_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.advance()
+        # advance to the next token until a ; is found
+        while self.tokens[self.current_token_index].type != 'SEMICOLON':
+            if self.tokens[self.current_token_index].type == 'NEWLINE':
+                self.line_number += 1
+                raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
 
-    def parse_variable_change(self, body = None):
-        name = self.advance().value
-        next_tok = self.advance()
-        if next_tok.type == 'THIS':
-            name = self.advance().value
+            var_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.advance()
+        return var_node
+    
+    def parse_var_change(self):
+        var_node = jn.JangVarNode(self.tokens[self.current_token_index])
+        # check if the next token is an identifier or an array
+        self.advance()
+        var_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+        self.expect_token_type('ASSIGN', 'to')
+        while self.tokens[self.current_token_index].type != 'SEMICOLON':
+            if self.tokens[self.current_token_index].type == 'NEWLINE':
+                self.line_number += 1
+                raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
+
+            # print(self.tokens[self.current_token_index])
+            self.advance()
+            var_node.add_child(jn.JangNodes(self.parse_expression()))
+            # self.advance()
+        return var_node
+    
+    def parse_while(self):
+        while_node = jn.JangWhileNode(self.tokens[self.current_token_index])
+        # self.advance()
+        self.expect_token_type('LPAREN', '(')
+        self.advance()
+        while self.tokens[self.current_token_index].type != 'RPAREN':
+            if self.tokens[self.current_token_index].type == 'NEWLINE':
+                self.line_number += 1
+                raise RuntimeError(f'Expected a ) at line {self.line_number} but None was found')
+
+            while_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.advance()
+        if self.tokens[self.current_token_index].type != 'RPAREN':
+            raise RuntimeError(f'Expected a ) at line {self.line_number} but None was found')
+        self.expect_token_type('IF', 'if')
+        self.expect_token_type('FR', 'fr')
+        # new line
+        self.advance()
+        if self.tokens[self.current_token_index].type == 'NEWLINE':
+            self.line_number += 1
+        self.expect_token_type('LBRACE', '{')
+        while_node.add_child(self.parse_body())
+        if self.tokens[self.current_token_index].type != 'RBRACE':
+            raise RuntimeError("Expected a '}' at line {} but None was found".format(self.line_number))
+        
+        return while_node
+
+    def parse_ret(self):
+        ret_node = jn.JangReturnNode(self.tokens[self.current_token_index])
+        self.advance()
+        while self.tokens[self.current_token_index].type != 'SEMICOLON':
+            if self.tokens[self.current_token_index].type == 'NEWLINE':
+                self.line_number += 1
+                raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
+
+            ret_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+            self.advance()
+        return ret_node
+
+
+    def expect_token_type(self, expected_type, expected_tk=None, node=None):
+        c_token = self.advance()
+        if c_token.type == expected_type:
+            if node:
+                node.add_child(jn.JangNodes(c_token))
         else:
-            name = next_tok.value
-        if name not in self.variables:
-            raise RuntimeError('Variable not declared')
-        if self.advance().value != 'to':
-            raise RuntimeError('Expected "to" in variable change')
-        expr = self.parse_expression()
-        value = expr 
-        # if self.advance().type != 'SEMICOLON':
-        #     raise RuntimeError('Expected SEMICOLON at the end of the variable change')
-        self.variables[name] = (self.variables[name][0], value)
-        if body != None:
-            body.append(f"{name} = {value}")
+            raise RuntimeError(f'Expected a {expected_tk} at line {self.line_number} but None was found')
+        
+    def parse_factor(self):
+        token = self.tokens[self.current_token_index]
 
+        if token and token.type in ['INT_LITERAL', 'FLOAT_LITERAL', 'IDENTIFIER']:
+            node = jn.JangNodes(token)
+            self.advance()
+            return (node)
 
-# test the parser
-if __name__ == '__main__':
-    lexer = JL.JangLexer()
-    parser = JangParser(lexer)
+        elif token and token.type == 'LPAREN':
+            self.advance()
+            expr_res = self.parse_expression()
+            if self.current_token and self.current_token.type == 'RPAREN':
+                self.advance()
+                return expr_res.node
+            else:
+                raise RuntimeError(f"Expected ')' at line {self.line_number} but None was found")
 
-    text = """is (True == yuh) fr {
-            julio says "Hello World";
-            julio says "Goodbye World";
-        } otherwise {
-            julio says "Goodbye World";
-        }
+        raise RuntimeError(f"Expected a factor at line {self.line_number} but None was found")
 
-    """
-    tokens = lexer.tokenize(text)
-    parser.parse_tokens(tokens)
+    def parse_term(self):
+        return self.bin_op(self.parse_factor, ['TIMES', 'DIVIDE'])
 
-    # print the AST
-    for code in parser.ast:
-        print(code)
+    def parse_expression(self):
+        return self.bin_op(self.parse_term, ['PLUS', 'MINUS'])
+
+    def bin_op(self, func, ops):
+        left = func()
+
+        while self.tokens[self.current_token_index] and self.tokens[self.current_token_index].type in ops:
+            op_token = self.tokens[self.current_token_index]
+            self.advance()
+            right = func()
+            left = jn.BinOpNode(left, op_token, right)
+
+        return left

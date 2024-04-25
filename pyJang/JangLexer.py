@@ -1,16 +1,17 @@
-import re 
 from JangTokens import J_TOKENS
+
+import re
 
 class JangTokens:
     def __init__(self, type_, value=None, pos=None):
         self.type = type_
         self.value = value
         self.pos = pos
-    
+
     def __repr__(self):
         if self.value: return f'{self.type}: {self.value}'
         return f'{self.type}'
-
+    
 class JangLexer:
     # Initialize the lexer
     def __init__(self):
@@ -20,6 +21,8 @@ class JangLexer:
 
         # compile the regular expressions for each token
         self.compile_tk = {tok: re.compile(regex) for tok, regex in J_TOKENS.items()}
+
+        # print(self.compile_tk)
 
     # Tokenize a given text
     def tokenize(self, text, line_number=1):
@@ -39,10 +42,9 @@ class JangLexer:
                     # get the value of the token
                     value = match.group(0)
                     # check the token type
-                    # if the token is SKIP, do nothing
-                    if token == 'SKIP':
+                    # if the token is TAB or NEWLINE, do nothing
+                    if token == 'TAB':
                         pass
-                    # if the token is NEWLINE, add a newline token
                     elif token == 'NEWLINE':
                         self.tokens.append(JangTokens('NEWLINE'))
                     # if the token is EOF, add an EOF token
@@ -58,9 +60,5 @@ class JangLexer:
                     self.pos = match.end(0)
                     break
             if not match:
-                # if no match is found, raise an error
-                raise RuntimeError(f'Could not match any token at position {self.pos}')
+                raise RuntimeError(f'Invalid token: line {line_number} column {self.pos}')
         return self.tokens
-    
-    def __repr__(self):
-        return f'{self.tokens}'

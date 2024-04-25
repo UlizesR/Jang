@@ -9,12 +9,12 @@ julio wants int main(int args)
 
     make int arr[];
 
-    change arr[4] to 42 + x;
+    change arr[4] to 42;
 
     make int i be 0;
     till (i > 10) is fr
     {
-        julio says i;
+        julio says (1 + 3) * x;
     }
 
     julio gets 0;

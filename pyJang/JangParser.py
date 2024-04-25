@@ -116,9 +116,13 @@ class JangParser:
                 self.line_number += 1
                 raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
             # if self.tokens[self.current_token_index].type == 'IDENTIFIER':
-            print_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
-            self.advance()
-
+            if self.tokens[self.current_token_index].type not in ['STRING_LITERAL', 'INT_LITERAL', 'FLOAT_LITERAL']:
+                # self.advance()
+                print(self.tokens[self.current_token_index])
+                print_node.add_child(jn.JangNodes(self.parse_expression()))
+            else:
+                print_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
+                self.advance()
         return print_node
     
     def parse_var_dcl(self):
@@ -137,8 +141,8 @@ class JangParser:
                 self.line_number += 1
                 raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
 
-            var_node.add_child(jn.JangNodes(self.tokens[self.current_token_index]))
             self.advance()
+            var_node.add_child(jn.JangNodes(self.parse_expression()))
         return var_node
     
     def parse_var_change(self):
@@ -152,10 +156,8 @@ class JangParser:
                 self.line_number += 1
                 raise RuntimeError(f'Expected a ; at line {self.line_number} but None was found')
 
-            # print(self.tokens[self.current_token_index])
             self.advance()
             var_node.add_child(jn.JangNodes(self.parse_expression()))
-            # self.advance()
         return var_node
     
     def parse_while(self):
@@ -217,9 +219,9 @@ class JangParser:
         elif token and token.type == 'LPAREN':
             self.advance()
             expr_res = self.parse_expression()
-            if self.current_token and self.current_token.type == 'RPAREN':
+            if self.tokens[self.current_token_index] and self.tokens[self.current_token_index].type == 'RPAREN':
                 self.advance()
-                return expr_res.node
+                return expr_res
             else:
                 raise RuntimeError(f"Expected ')' at line {self.line_number} but None was found")
 
